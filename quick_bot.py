@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
 import time
 import re
+from telebot import types
 from sheets_utils import get_dns_url_from_sheet
 
 # Dicionário temporário para armazenar dados por chat
@@ -9,14 +10,18 @@ dados_quick = {}
 def iniciar_fluxo_quick(bot, message):
     chat_id = message.chat.id
     print(f"[QuickBot] Iniciando fluxo para chat_id={chat_id}")
-    bot.send_message(chat_id, "🚀 Você escolheu o app *Quick*.\n\nPor favor, envie o número do *MAC address*.\nExemplo: `XX:XX:XX:XX:XX:XX`", parse_mode='Markdown')
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
+    bot.send_message(chat_id, "🚀 Você escolheu o app *Quick*.\n\nPor favor, envie o número do *MAC address*.\nExemplo: `XX:XX:XX:XX:XX:XX`", parse_mode='Markdown', reply_markup=markup)
     bot.register_next_step_handler(message, lambda msg: receber_mac(bot, msg, chat_id))
 
 def receber_mac(bot, message, chat_id):
     mac = message.text.strip()
     dados_quick[chat_id] = {"mac": mac}
     print(f"[QuickBot] MAC recebido: {mac}")
-    bot.send_message(chat_id, "Agora envie o link M3U:")
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
+    bot.send_message(chat_id, "Agora envie o link M3U:", reply_markup=markup)
     bot.register_next_step_handler(message, lambda msg: receber_url_m3u(bot, msg, chat_id))
 
 def receber_url_m3u(bot, message, chat_id):

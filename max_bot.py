@@ -6,7 +6,9 @@ from telebot import types
 # Fluxo principal iniciado após a escolha do app Max
 def iniciar_fluxo_max(bot, message, usuarios_em_autenticacao):
     chat_id = message.chat.id
-    bot.send_message(chat_id, "Você escolheu o app *Max*.\nAgora digite o *nome de usuário* que deseja criar no painel:", parse_mode='Markdown')
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
+    bot.send_message(chat_id, "Você escolheu o app *Max*.\nAgora digite o *nome de usuário* que deseja criar no painel:", parse_mode='Markdown', reply_markup=markup)
     bot.register_next_step_handler(message, lambda msg: receber_novo_username(bot, msg, usuarios_em_autenticacao))
 
 def receber_novo_username(bot, message, usuarios_em_autenticacao):
@@ -14,7 +16,9 @@ def receber_novo_username(bot, message, usuarios_em_autenticacao):
     novo_user = message.text.strip()
     usuarios_em_autenticacao[str(chat_id) + "_novo_user"] = novo_user
 
-    bot.send_message(chat_id, "Agora digite a *senha* para esse novo usuário:", parse_mode='Markdown')
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
+    bot.send_message(chat_id, "Agora digite a *senha* para esse novo usuário:", parse_mode='Markdown', reply_markup=markup)
     bot.register_next_step_handler(message, lambda msg: receber_nova_senha(bot, msg, usuarios_em_autenticacao))
 
 def receber_nova_senha(bot, message, usuarios_em_autenticacao):

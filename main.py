@@ -36,6 +36,7 @@ def receber_username(message):
     botao_sim = types.InlineKeyboardButton("Sim", callback_data=f"confirmar:{username}")
     botao_nao = types.InlineKeyboardButton("Não", callback_data="negar")
     markup.add(botao_sim, botao_nao)
+    markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
 
     bot.send_message(
         message.chat.id,
@@ -51,6 +52,14 @@ def receber_username(message):
 def callback_query(call):
     try:
         chat_id = call.message.chat.id
+
+        if call.data == "voltar":
+            markup = types.InlineKeyboardMarkup()
+            btn_max = types.InlineKeyboardButton("MaxPlayer", callback_data="app_escolhido:MaxPlayer")
+            btn_quick = types.InlineKeyboardButton("QuickPlayer", callback_data="app_escolhido:QuickPlayer")
+            markup.add(btn_max, btn_quick)
+            bot.send_message(chat_id, "Escolha o aplicativo que deseja acessar:", reply_markup=markup)
+            return
 
         if call.data.startswith("confirmar:"):
             username = call.data.split(":")[1]
@@ -102,6 +111,7 @@ def verificar_senha(message):
         btn_max = types.InlineKeyboardButton("MaxPlayer", callback_data="app_escolhido:MaxPlayer")
         btn_quick = types.InlineKeyboardButton("QuickPlayer", callback_data="app_escolhido:QuickPlayer")
         markup.add(btn_max, btn_quick)
+        markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
         bot.send_message(
             chat_id,
             f"""✅ Autenticação bem-sucedida.\n\n
