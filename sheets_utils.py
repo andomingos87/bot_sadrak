@@ -25,6 +25,16 @@ def get_dns_url_from_sheet(nome_planilha="app.plugtv_bot", nome_aba="DNS", linha
     valor = aba.cell(linha, coluna).value
     return valor.strip() if valor else None
 
+def get_epg_url_from_sheet():
+    """
+    Retorna a URL do EPG baseada no valor de A2 da aba DNS da planilha padrão.
+    Exemplo: se A2 for https://cr61.net, retorna https://cr61.net/epg
+    """
+    base_url = get_dns_url_from_sheet()
+    if base_url:
+        return base_url.rstrip('/') + '/epg'
+    return None
+
 def obter_senha(username, nome_planilha="app.plugtv_bot", nome_aba="usuarios", col_usuario=1, col_senha=2):
     gc = gspread.service_account(filename='service_account.json')
     planilha = gc.open(nome_planilha)

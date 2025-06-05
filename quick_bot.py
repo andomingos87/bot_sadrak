@@ -2,7 +2,7 @@ from playwright.sync_api import sync_playwright
 import time
 import re
 from telebot import types
-from sheets_utils import get_dns_url_from_sheet
+from sheets_utils import get_dns_url_from_sheet, get_epg_url_from_sheet
 
 # Dicionário temporário para armazenar dados por chat
 dados_quick = {}
@@ -77,6 +77,14 @@ def automatizar_quick(mac, url):
 
             print("[QuickBot] Preenchendo URL da playlist...")
             pagina.fill('input#upload-playlist-by-url_url', url)
+
+            # Preencher o campo EPG com a URL correta
+            epg_url = get_epg_url_from_sheet()
+            if epg_url:
+                print(f"[QuickBot] Preenchendo EPG: {epg_url}")
+                pagina.fill('input#upload-playlist-by-url_epg_url', epg_url)
+            else:
+                print("[QuickBot] Não foi possível obter a URL do EPG.")
 
             print("[QuickBot] Preenchendo nome da lista: PLUGTV")
             pagina.wait_for_selector('#upload-playlist-by-url_name', timeout=10000)
