@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+
+# Virtualenv
+venv/
+env/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Configurações e credenciais
+.env
+service_account.json
+
+# Playwright
+playwright-report/
+
+# Google Sheets cache
+.gspread_token.json
+
+# Outros
+*.db
+*.sqlite3
+videos_quick/
