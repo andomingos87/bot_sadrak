@@ -167,5 +167,5 @@ Use os comandos abaixo para começar:
     )
 
 if __name__ == "__main__":
-    bot.polling()
+    bot.infinity_polling()
 
