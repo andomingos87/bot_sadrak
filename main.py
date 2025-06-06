@@ -119,7 +119,7 @@ def verificar_senha(message):
     senha_digitada = message.text.strip()
 
     if chat_id not in usuarios_em_autenticacao:
-        bot.send_message(chat_id, "Sessão expirada. Digite /iniciar para começar novamente.")
+        bot.send_message(chat_id, "Sessão expirada. Digite /entrar para começar novamente.")
         fluxos_ativos.discard(chat_id)
         return
 
@@ -150,7 +150,7 @@ Escolha o aplicativo que deseja acessar\nSe você está tendo problemas, mande /
 # Handler genérico
 # ──────────────────────────────
 def verificar(mensagem):
-    return mensagem.text not in ["/iniciar", "/sair"]
+    return mensagem.text not in ["/entrar", "/sair"]
 
 @bot.message_handler(func=verificar)
 def responder(message):
