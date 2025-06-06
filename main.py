@@ -9,13 +9,28 @@ apikey = os.getenv("BOT_TELEGRAM_API")
 bot = telebot.TeleBot(apikey)
 
 usuarios_em_autenticacao = {}  # Armazena estado temporário por chat_id
+fluxos_ativos = set()  # Controle de fluxo ativo por chat_id
 
 # ──────────────────────────────
 # Comando /entrar
 # ──────────────────────────────
+def exibir_menu_inicial(chat_id):
+    markup = types.InlineKeyboardMarkup()
+    btn_max = types.InlineKeyboardButton("MaxPlayer", callback_data="app_escolhido:MaxPlayer")
+    btn_quick = types.InlineKeyboardButton("QuickPlayer", callback_data="app_escolhido:QuickPlayer")
+    markup.add(btn_max, btn_quick)
+    bot.send_message(chat_id, "Escolha o aplicativo que deseja acessar:", reply_markup=markup)
+
 @bot.message_handler(commands=['entrar'])
 def iniciar(message):
-    bot.send_message(message.chat.id, "Digite o seu nome de usuário:")
+    chat_id = message.chat.id
+    if chat_id in fluxos_ativos:
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
+        bot.send_message(chat_id, "Já existe um fluxo ativo para este chat. Clique em 'Voltar' para reiniciar.", reply_markup=markup)
+        return
+    fluxos_ativos.add(chat_id)
+    bot.send_message(chat_id, "Digite o seu nome de usuário:")
     bot.register_next_step_handler(message, receber_username)
 
 # ──────────────────────────────
@@ -23,13 +38,18 @@ def iniciar(message):
 # ──────────────────────────────
 @bot.message_handler(commands=['sair'])
 def sair(message):
-    usuarios_em_autenticacao.pop(message.chat.id, None)
-    bot.send_message(message.chat.id, "Você saiu. \nPara entrar novamente envie /entrar")
+    chat_id = message.chat.id
+    usuarios_em_autenticacao.pop(chat_id, None)
+    fluxos_ativos.discard(chat_id)
+    bot.send_message(chat_id, "Você saiu. \nPara entrar novamente envie /entrar")
 
 # ──────────────────────────────
 # Etapa: receber o nome de usuário
 # ──────────────────────────────
 def receber_username(message):
+    chat_id = message.chat.id
+    if chat_id not in fluxos_ativos:
+        return  # Handler antigo, ignorar
     username = message.text.strip()
 
     markup = types.InlineKeyboardMarkup()
@@ -39,7 +59,7 @@ def receber_username(message):
     markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
 
     bot.send_message(
-        message.chat.id,
+        chat_id,
         f"Você digitou *{username}*, está correto?",
         reply_markup=markup,
         parse_mode='Markdown'
@@ -54,11 +74,10 @@ def callback_query(call):
         chat_id = call.message.chat.id
 
         if call.data == "voltar":
-            markup = types.InlineKeyboardMarkup()
-            btn_max = types.InlineKeyboardButton("MaxPlayer", callback_data="app_escolhido:MaxPlayer")
-            btn_quick = types.InlineKeyboardButton("QuickPlayer", callback_data="app_escolhido:QuickPlayer")
-            markup.add(btn_max, btn_quick)
-            bot.send_message(chat_id, "Escolha o aplicativo que deseja acessar:", reply_markup=markup)
+            fluxos_ativos.discard(chat_id)
+            usuarios_em_autenticacao.pop(chat_id, None)
+            bot.send_message(chat_id, "Fluxo reiniciado.")
+            exibir_menu_inicial(chat_id)
             return
 
         if call.data.startswith("confirmar:"):
@@ -95,10 +114,13 @@ def callback_query(call):
 # ──────────────────────────────
 def verificar_senha(message):
     chat_id = message.chat.id
+    if chat_id not in fluxos_ativos:
+        return  # Handler antigo, ignorar
     senha_digitada = message.text.strip()
 
     if chat_id not in usuarios_em_autenticacao:
         bot.send_message(chat_id, "Sessão expirada. Digite /iniciar para começar novamente.")
+        fluxos_ativos.discard(chat_id)
         return
 
     username = usuarios_em_autenticacao[chat_id]

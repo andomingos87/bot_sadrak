@@ -5,14 +5,22 @@ from telebot import types
 
 # Fluxo principal iniciado após a escolha do app Max
 def iniciar_fluxo_max(bot, message, usuarios_em_autenticacao):
+    from main import fluxos_ativos  # Importa o set compartilhado
     chat_id = message.chat.id
+    if chat_id in fluxos_ativos:
+        bot.send_message(chat_id, "Já existe um fluxo ativo para este chat. Clique em 'Voltar' para reiniciar.")
+        return
+    fluxos_ativos.add(chat_id)
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
     bot.send_message(chat_id, "Você escolheu o app *Max*.\nAgora digite o *nome de usuário* que deseja criar no painel:", parse_mode='Markdown', reply_markup=markup)
     bot.register_next_step_handler(message, lambda msg: receber_novo_username(bot, msg, usuarios_em_autenticacao))
 
 def receber_novo_username(bot, message, usuarios_em_autenticacao):
+    from main import fluxos_ativos
     chat_id = message.chat.id
+    if chat_id not in fluxos_ativos:
+        return  # Handler antigo, ignorar
     novo_user = message.text.strip()
     usuarios_em_autenticacao[str(chat_id) + "_novo_user"] = novo_user
 
@@ -22,11 +30,14 @@ def receber_novo_username(bot, message, usuarios_em_autenticacao):
     bot.register_next_step_handler(message, lambda msg: receber_nova_senha(bot, msg, usuarios_em_autenticacao))
 
 def receber_nova_senha(bot, message, usuarios_em_autenticacao):
+    from main import fluxos_ativos
     chat_id = message.chat.id
+    if chat_id not in fluxos_ativos:
+        return  # Handler antigo, ignorar
     nova_senha = message.text.strip()
     novo_user = usuarios_em_autenticacao.get(str(chat_id) + "_novo_user")
 
-    bot.send_message(chat_id, "🔄 Acessando o painel e cadastrando o novo usuário... Aguarde.")
+    bot.send_message(chat_id, "Acessando o painel e cadastrando o novo usuário... Aguarde.")
 
     try:
         resposta = executar_login(novo_user, nova_senha)
@@ -46,6 +57,7 @@ def receber_nova_senha(bot, message, usuarios_em_autenticacao):
 
     usuarios_em_autenticacao.pop(chat_id, None)
     usuarios_em_autenticacao.pop(str(chat_id) + "_novo_user", None)
+    fluxos_ativos.discard(chat_id)  # Limpa o fluxo ao finalizar
 
 def executar_login(novo_username, nova_senha):
     painel_email = os.getenv("PAINEL_MAX_EMAIL")

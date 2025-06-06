@@ -8,7 +8,12 @@ from sheets_utils import get_dns_url_from_sheet, get_epg_url_from_sheet
 dados_quick = {}
 
 def iniciar_fluxo_quick(bot, message):
+    from main import fluxos_ativos
     chat_id = message.chat.id
+    if chat_id in fluxos_ativos:
+        bot.send_message(chat_id, "Já existe um fluxo ativo para este chat. Clique em 'Voltar' para reiniciar.")
+        return
+    fluxos_ativos.add(chat_id)
     print(f"[QuickBot] Iniciando fluxo para chat_id={chat_id}")
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
@@ -16,6 +21,9 @@ def iniciar_fluxo_quick(bot, message):
     bot.register_next_step_handler(message, lambda msg: receber_mac(bot, msg, chat_id))
 
 def receber_mac(bot, message, chat_id):
+    from main import fluxos_ativos
+    if chat_id not in fluxos_ativos:
+        return  # Handler antigo, ignorar
     mac = message.text.strip()
     dados_quick[chat_id] = {"mac": mac}
     print(f"[QuickBot] MAC recebido: {mac}")
@@ -25,11 +33,15 @@ def receber_mac(bot, message, chat_id):
     bot.register_next_step_handler(message, lambda msg: receber_url_m3u(bot, msg, chat_id))
 
 def receber_url_m3u(bot, message, chat_id):
+    from main import fluxos_ativos
+    if chat_id not in fluxos_ativos:
+        return  # Handler antigo, ignorar
     url_original = message.text.strip()
     # Busca dinâmica da URL base na planilha
     url_base = get_dns_url_from_sheet()
     if not url_base:
         bot.send_message(chat_id, "❌ Erro ao obter a URL base do sistema Quick. Contate o suporte.")
+        fluxos_ativos.discard(chat_id)
         return
     url_alterada = re.sub(r"^https?://[^/]+", url_base, url_original)
     dados_quick[chat_id]["url"] = url_alterada
@@ -57,6 +69,7 @@ def receber_url_m3u(bot, message, chat_id):
     else:
         print("[QuickBot] Falha no envio da playlist.")
         bot.send_message(chat_id, "❌ Ocorreu um erro ao enviar a playlist. Tente novamente mais tarde.")
+    fluxos_ativos.discard(chat_id)  # Limpa o fluxo ao finalizar
 
 def automatizar_quick(mac, url):
     print("[QuickBot] Iniciando automação com Playwright...")
