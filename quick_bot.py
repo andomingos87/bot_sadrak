@@ -25,6 +25,19 @@ def receber_mac(bot, message, chat_id):
     if chat_id not in fluxos_ativos:
         return  # Handler antigo, ignorar
     mac = message.text.strip()
+
+    padrao_mac = r"^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}$"
+    if not re.match(padrao_mac, mac):
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton("Voltar", callback_data="voltar"))
+        bot.send_message(
+            chat_id,
+            "❌ Formato de MAC inválido. Envie novamente no formato XX:XX:XX:XX:XX:XX.",
+            reply_markup=markup,
+        )
+        bot.register_next_step_handler(message, lambda msg: receber_mac(bot, msg, chat_id))
+        return
+
     dados_quick[chat_id] = {"mac": mac}
     print(f"[QuickBot] MAC recebido: {mac}")
     markup = types.InlineKeyboardMarkup()
