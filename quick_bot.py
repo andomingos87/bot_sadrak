@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
 import time
 import re
+from datetime import datetime
 from telebot import types
 from sheets_utils import get_dns_url_from_sheet, get_epg_url_from_sheet
 
@@ -61,9 +62,10 @@ def receber_url_m3u(bot, message, chat_id):
         btn_max = types.InlineKeyboardButton("MaxPlayer", callback_data="app_escolhido:MaxPlayer")
         btn_quick = types.InlineKeyboardButton("QuickPlayer", callback_data="app_escolhido:QuickPlayer")
         markup.add(btn_max, btn_quick)
+        datahora_menu = datetime.now().strftime("%d/%m/%Y %H:%M")
         bot.send_message(
             chat_id,
-            """Escolha o aplicativo que deseja acessar\n Se você está tendo problemas, mande /sair e faça /entrar novamente!\nNão envie mensagens com o menu aberto.\n\nMENU ATUALIZADO em 04/06/2025 20:59""",
+            f"""Escolha o aplicativo que deseja acessar\n Se você está tendo problemas, mande /sair e faça /entrar novamente!\nNão envie mensagens com o menu aberto.\n\nMENU ATUALIZADO em {datahora_menu}""",
             reply_markup=markup
         )
     else:

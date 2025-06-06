@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
 import time
 import os
+from datetime import datetime
 from telebot import types
 
 # Fluxo principal iniciado após a escolha do app Max
@@ -47,9 +48,10 @@ def receber_nova_senha(bot, message, usuarios_em_autenticacao):
             btn_max = types.InlineKeyboardButton("MaxPlayer", callback_data="app_escolhido:MaxPlayer")
             btn_quick = types.InlineKeyboardButton("QuickPlayer", callback_data="app_escolhido:QuickPlayer")
             markup.add(btn_max, btn_quick)
+            datahora_menu = datetime.now().strftime("%d/%m/%Y %H:%M")
             bot.send_message(
                 chat_id,
-                """Escolha o aplicativo que deseja acessar\n Se você está tendo problemas, mande /sair e faça /entrar novamente!\nNão envie mensagens com o menu aberto.\n\nMENU ATUALIZADO em 04/06/2025 20:59""",
+                f"""Escolha o aplicativo que deseja acessar\n Se você está tendo problemas, mande /sair e faça /entrar novamente!\nNão envie mensagens com o menu aberto.\n\nMENU ATUALIZADO em {datahora_menu}""",
                 reply_markup=markup
             )
     except Exception as e:
