@@ -72,6 +72,8 @@ def receber_username(message):
 def callback_query(call):
     try:
         chat_id = call.message.chat.id
+        # Envia resposta imediata ao Telegram para evitar timeout
+        bot.answer_callback_query(call.id)
 
         if call.data == "voltar":
             fluxos_ativos.discard(chat_id)
