@@ -42,6 +42,7 @@ def receber_url_m3u(bot, message, chat_id):
     if not url_base:
         bot.send_message(chat_id, "❌ Erro ao obter a URL base do sistema Quick. Contate o suporte.")
         fluxos_ativos.discard(chat_id)
+        dados_quick.pop(chat_id, None)
         return
     url_alterada = re.sub(r"^https?://[^/]+", url_base, url_original)
     dados_quick[chat_id]["url"] = url_alterada
@@ -70,6 +71,7 @@ def receber_url_m3u(bot, message, chat_id):
         print("[QuickBot] Falha no envio da playlist.")
         bot.send_message(chat_id, "❌ Ocorreu um erro ao enviar a playlist. Tente novamente mais tarde.")
     fluxos_ativos.discard(chat_id)  # Limpa o fluxo ao finalizar
+    dados_quick.pop(chat_id, None)
 
 def automatizar_quick(mac, url):
     print("[QuickBot] Iniciando automação com Playwright...")
