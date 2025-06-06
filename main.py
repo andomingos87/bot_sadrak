@@ -150,7 +150,8 @@ Escolha o aplicativo que deseja acessar\nSe você está tendo problemas, mande /
 # Handler genérico
 # ──────────────────────────────
 def verificar(mensagem):
-    return mensagem.text not in ["/iniciar", "/sair"]
+    texto = getattr(mensagem, "text", "")
+    return texto not in ["/entrar", "/sair"]
 
 @bot.message_handler(func=verificar)
 def responder(message):
