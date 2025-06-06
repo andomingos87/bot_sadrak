@@ -111,4 +111,4 @@ def executar_login(novo_username, nova_senha):
 
     except Exception as e:
         print(f"[ERRO] {str(e)}")
-        return "❌ Erro durante o processo. Por favor, digite /iniciar e tente novamente."
+        return "❌ Erro durante o processo. Por favor, digite /entrar e tente novamente."
